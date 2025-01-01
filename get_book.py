@@ -18,7 +18,6 @@ class WebData:
         self._name = name
         self._web = web
         self._cofg = cofg or {}
-        self._rt = quote if self._cofg.get("quote", False) else lambda x: x
 
     @staticmethod
     def from_file_load(path: str) -> "WebData":
@@ -54,11 +53,11 @@ class WebData:
             if arg is None:
                 continue
             elif isinstance(arg, str):
-                values.append(self._rt(arg))
+                values.append(arg)
             elif isinstance(arg, list):
-                values.extend(map(self._rt, arg))
+                values.extend(arg)
             elif isinstance(arg, dict):
-                kwargs.update({k: self._rt(v) for k, v in arg.items()})
+                kwargs.update({k: v for k, v in arg.items()})
 
         try:
             return {"name": self._name, "web": self._web.format(*values, **kwargs)}
@@ -130,27 +129,37 @@ def is_data_text(data_text: str) -> bool:
     return any(keyword in data_text for keyword in ["有更新", "尚未閱讀", "無更新"])
 
 
+def load_web_data() -> None:
+    for book_json in glob.glob("./book-data/*.json"):
+        web_data_list.append(WebData.from_file_load(book_json))
+        logger.debug(f"load book data: {book_json}")
+
+
+def handle_user_input() -> None:
+    while True:
+        user_input = input("Book name: ")
+        if not user_input:
+            break
+        if is_data_text(user_input):
+            book_list.extend(text_to_data(user_input))
+        else:
+            book_list.append(user_input)
+
+
+def process_books() -> None:
+    book_list_len = len(book_list)
+    for i, book in enumerate(book_list):
+        input(f"{((i+1)/book_list_len) * 100:.2f}%({i +
+              1}/{book_list_len})=>{book}: Press Enter to continue...")
+        clipboard.copy_to_clipboard(book)
+        web_data_list.open_all({"q": book})
+
+
 def main() -> None:
     try:
-        for book_json in glob.glob("./book-data/*.json"):
-            web_data_list.append(WebData.from_file_load(book_json))
-            logger.debug(f"load book data: {book_json}")
-        while True:
-            user_input = input("Book name: ")
-            if not user_input:
-                break
-            if is_data_text(user_input):
-                book_list.extend(text_to_data(user_input))
-            else:
-                book_list.append(user_input)
-
-        for i in range((book_list_len := len(book_list))):
-            book = book_list[i]
-            input(f"{((i+1)/book_list_len) * 100:.2f}%({i +
-                  1}/{book_list_len})=>{book}: Press Enter to continue...")
-            clipboard.copy_to_clipboard(book)
-            web_data_list.open_all({"q": book})
-
+        load_web_data()
+        handle_user_input()
+        process_books()
     except (EOFError, KeyboardInterrupt):
         logger.info("\nOperation canceled.")
 
