@@ -1,0 +1,5 @@
+{
+  "$schema": "file:///C:\\Users\\p\\Documents\\git\\get_book\\book-data.schema.json",
+  "name": "85度c小說網",
+  "web": "https://www.85novel.com/search?k={q}"
+}

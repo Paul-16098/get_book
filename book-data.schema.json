@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "Paul-16098/get_book/book-data",
+  "$comment": "see `WebData.from_file_load`",
+  "properties": {
+    "name": {
+      "type": "string",
+      "$comment": "the web name."
+    },
+    "web": {
+      "type": "string",
+      "$comment": "the web url."
+    },
+    "cofg": {
+      "type": "object",
+      "default": {},
+      "$comment": "the cofg for this.",
+      "properties": {
+        "quote": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
