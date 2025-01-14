@@ -1,3 +1,0 @@
-[submodule "paul_tools"]
-	path = pylib/paul_tools
-	url = https://github.com/Paul-16098/paul_tools.git

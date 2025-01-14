@@ -2,9 +2,8 @@ import glob
 import json
 from typing import Any, TypedDict, NotRequired
 from webbrowser import open as open_url
-from urllib.parse import quote
-from pylib.paul_tools import logger
-from pylib.paul_tools.Tools import clipboard
+from paul_tools import logger
+from paul_tools.Tools import clipboard
 
 
 class JSONType(TypedDict):
