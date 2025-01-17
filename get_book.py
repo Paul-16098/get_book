@@ -3,7 +3,7 @@ import json
 from typing import Any, TypedDict, NotRequired
 from webbrowser import open as open_url
 from paul_tools import logger
-from paul_tools.Tools import clipboard
+from pyperclip import copy as copy_text
 
 
 class JSONType(TypedDict):
@@ -150,7 +150,7 @@ def process_books() -> None:
     for i, book in enumerate(book_list):
         input(f"{((i+1)/book_list_len) * 100:.2f}%({i +
               1}/{book_list_len})=>{book}: Press Enter to continue...")
-        clipboard.copy_to_clipboard(book)
+        copy_text(book)
         web_data_list.open_all({"q": book})
 
 
