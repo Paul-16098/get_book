@@ -1,7 +1,8 @@
 import glob
 import json
-from typing import Any, TypedDict, NotRequired
+from typing import Any, NotRequired, TypedDict
 from webbrowser import open as open_url
+
 from paul_tools import logger
 from pyperclip import copy as copy_text
 
@@ -27,7 +28,7 @@ class WebData:
         """
         with open(path, "r", encoding="utf-8") as f:
             j: JSONType = json.load(f)
-        return WebData(j.get('name', ''), j.get('web', ''), j.get('cofg', {}))
+        return WebData(j.get("name", ""), j.get("web", ""), j.get("cofg", {}))
 
     @property
     def name(self) -> str:
@@ -69,11 +70,13 @@ class WebData:
         :param args: Arguments to format the URL
         :return: Result of opening the URL
         """
-        return open_url(self.get(*args)['web'])
+        return open_url(self.get(*args)["web"])
 
 
 class WebDataList(list[WebData]):
-    def get(self, index: int, *args: str | list[str] | dict[str, str] | None) -> dict[str, str]:
+    def get(
+        self, index: int, *args: str | list[str] | dict[str, str] | None
+    ) -> dict[str, str]:
         """Get formatted URL for a specific WebData in the list.
 
         :param index: Index of the WebData instance
@@ -82,7 +85,9 @@ class WebDataList(list[WebData]):
         """
         return self[index].get(*args)
 
-    def get_all(self, *args: str | list[str] | dict[str, str] | None) -> list[dict[str, str]]:
+    def get_all(
+        self, *args: str | list[str] | dict[str, str] | None
+    ) -> list[dict[str, str]]:
         """Get formatted URLs for all WebData in the list.
 
         :param args: Formatting arguments
@@ -109,18 +114,16 @@ class WebDataList(list[WebData]):
 
 
 # Predefined WebData instances
-web_data_list = WebDataList((
-    # WebData("小說狂人", "https://czbooks.net/s/{q}?q={q}"),
-    # WebData("85度c小說網", "https://www.85novel.com/search?k={q}"),
-    # WebData("69書吧", "https://69shuba.cx/modules/article/search.php")
-))
+web_data_list = WebDataList(())
 
 book_list: list[str] = []
 
 
 def text_to_data(text: str) -> list[str]:
     """將文字轉換為書名清單。"""
-    return [line.split(' ')[1].strip() for line in text.strip().split('\n') if line.strip()]
+    return [
+        line.split(" ")[1].strip() for line in text.strip().split("\n") if line.strip()
+    ]
 
 
 def is_data_text(data_text: str) -> bool:
@@ -148,8 +151,11 @@ def handle_user_input() -> None:
 def process_books() -> None:
     book_list_len = len(book_list)
     for i, book in enumerate(book_list):
-        input(f"{((i+1)/book_list_len) * 100:.2f}%({i +
-              1}/{book_list_len})=>{book}: Press Enter to continue...")
+        input(
+            f"{((i + 1) / book_list_len) * 100:.2f}%({i + 1}/{book_list_len})=>{
+                book
+            }: Press Enter to continue..."
+        )
         copy_text(book)
         web_data_list.open_all({"q": book})
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "file:///C:\\Users\\p\\Documents\\git\\get_book\\book-data.schema.json",
+  "$schema": "./../book-data.schema.json",
   "name": "69書吧",
-  "web": "https://69shuba.cx/modules/article/search.php"
+  "web": "https://www.69yuedu.net/modules/article/search.php"
 }
