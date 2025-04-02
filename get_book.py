@@ -1,5 +1,6 @@
 import glob
 import json
+import os
 from typing import Any, NotRequired, TypedDict
 from webbrowser import open as open_url
 
@@ -116,14 +117,14 @@ class WebDataList(list[WebData]):
 # Predefined WebData instances
 web_data_list = WebDataList(())
 
-book_list: list[str] = []
+book_data: list[str] = []
 
 
-def text_to_data(text: str) -> list[str]:
+def text_to_data(text: str) -> str:
     """將文字轉換為書名清單。"""
     return [
         line.split(" ")[1].strip() for line in text.strip().split("\n") if line.strip()
-    ]
+    ][0]
 
 
 def is_data_text(data_text: str) -> bool:
@@ -138,19 +139,29 @@ def load_web_data() -> None:
 
 
 def handle_user_input() -> None:
+    try:
+        with open("book-name.txt") as f:
+            for t in f.readlines():
+                print("load: ", t)
+                book_data.append(t)
+    except FileNotFoundError:
+        pass
     while True:
         user_input = input("Book name: ")
         if not user_input:
             break
         if is_data_text(user_input):
-            book_list.extend(text_to_data(user_input))
+            book_data.append(text_to_data(user_input))
         else:
-            book_list.append(user_input)
+            book_data.append(user_input)
+        with open("book-name.txt", "at") as f:
+            f.write(book_data[len(book_data) - 1] + "\n")
 
 
 def process_books() -> None:
-    book_list_len = len(book_list)
-    for i, book in enumerate(book_list):
+    book_list_len: int = len(book_data)
+    for i in range(book_list_len):
+        book = book_data.pop(0)
         input(
             f"{((i + 1) / book_list_len) * 100:.2f}%({i + 1}/{book_list_len})=>{
                 book
@@ -158,6 +169,10 @@ def process_books() -> None:
         )
         copy_text(book)
         web_data_list.open_all({"q": book})
+        os.remove("book-name.txt")
+        with open("book-name.txt", "xt") as f:
+            for t in book_data:
+                f.write(t + "\n")
 
 
 def main() -> None:
