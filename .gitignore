@@ -1,2 +1,2 @@
-log/
-output/
+*.log
+book-name.json

@@ -1,0 +1,5 @@
+{
+  "$schema": "./../book-data.schema.json",
+  "name": "69書吧",
+  "web": "https://www.69shuba.com/modules/article/bookcase.php?q={q}"
+}
