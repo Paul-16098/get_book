@@ -1,11 +1,10 @@
 import glob
 import json
 import os
-from typing import Any, NotRequired, TypedDict
+from typing import TypedDict  # , NotRequired
 from webbrowser import open as open_url
 
 from paul_tools import logger_init
-# from pyperclip import copy as copy_text
 
 
 def safe_remove(filepath: str) -> None:
@@ -22,21 +21,30 @@ def initialize_logger() -> None:
     logger.add("get_book.log", level="DEBUG")  # 添加新的日誌檔案
 
 
+# class WebDataCofgType(TypedDict):
+#     pass
+
+
 class WebDataType(TypedDict):
     """定義 WebData 的型別結構。"""
 
     name: str
     web: str
-    cofg: NotRequired[dict[str, Any]]
+    # cofg: NotRequired[WebDataCofgType]
 
 
 class WebData:
     """表示單個網站數據的類別。"""
 
-    def __init__(self, name: str, web: str, cofg: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        web: str,
+        # cofg: WebDataCofgType | None = None
+    ) -> None:
         self._name = name
         self._web = web
-        self._cofg = cofg or {}
+        # self._cofg = cofg or {}
 
     @staticmethod
     def from_file_load(path: str) -> "WebData":
@@ -47,7 +55,11 @@ class WebData:
         """
         with open(path, "r", encoding="utf-8") as f:
             j: WebDataType = json.load(f)
-        return WebData(j.get("name", ""), j.get("web", ""), j.get("cofg", {}))
+        return WebData(
+            j.get("name", ""),
+            j.get("web", ""),
+            # j.get("cofg", {})
+        )
 
     @property
     def name(self) -> str:
@@ -59,10 +71,10 @@ class WebData:
         """返回網站 URL。"""
         return self._web
 
-    @property
-    def cofg(self) -> dict[str, Any]:
-        """返回網站的配置字典。"""
-        return self._cofg
+    # @property
+    # def cofg(self):
+    #     """返回網站的配置字典。"""
+    #     return self._cofg
 
     def get(self, *args: str | list[str] | dict[str, str] | None) -> dict[str, str]:
         """Format the web URL with given arguments.
@@ -93,6 +105,11 @@ class WebData:
         :return: Result of opening the URL
         """
         return open_url(self.get(*args)["web"])
+
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, WebData):
+            return False
+        return self._name == value._name and self._web == value._web
 
 
 class WebDataList(list[WebData]):
@@ -151,9 +168,9 @@ class BookDataList(list[str]):
     def append(self, object: str) -> None:
         """添加書籍數據到列表中。"""
         if self.is_data_text(object):
-            logger.debug(f"Appending book data: {object}")
+            logger.debug(f"Appending book data: `{object}`")
             return super().append(self.text_to_data(object))
-        logger.debug(f"Appending regular book data: {object}")
+        logger.debug(f"Appending regular book data: `{object}`")
         return super().append(object)
 
     @staticmethod
@@ -179,7 +196,7 @@ class BookDataList(list[str]):
     def _process_single_book(self, book: str, index: int, total: int) -> None:
         """Process a single book."""
         progress = ((index + 1) / total) * 100
-        logger.debug(f"Processing: {book} ({index + 1}/{total})")
+        logger.debug(f"Processing: `{book}` ({index + 1}/{total})")
         input(f"{progress:.2f}%({index + 1}/{total})=>{book}")
         web_data_list.open_all({"q": book})
 
@@ -216,7 +233,8 @@ def handle_user_input() -> None:
             json.dump([], f, ensure_ascii=False)
 
     while True:
-        user_input = input("Book name: ")
+        print("Book name:", end="")
+        user_input = input()
         if not user_input:
             break
         if BookDataList.is_data_text(user_input):
