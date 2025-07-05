@@ -220,7 +220,18 @@ book_data: BookDataList = BookDataList()  # 預定義的書籍數據列表
 def handle_user_input() -> None:
     """處理使用者輸入的書籍名稱。"""
     try:
-        with open("book-name.json", encoding="utf-8") as f:
+        try:
+            with open("book-name.d.json", "rt", encoding="utf-8") as f:
+                o_l = len(book_data)
+                try:
+                    book_data.extend(json.load(f))
+                except json.decoder.JSONDecodeError as e:
+                    logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
+                finally:
+                    logger.info(f"Loaded {len(book_data) - o_l} book data from file.")
+        except FileNotFoundError:
+            pass
+        with open("book-name.json", "rt", encoding="utf-8") as f:
             o_l = len(book_data)
             try:
                 book_data.extend(json.load(f))
@@ -228,7 +239,8 @@ def handle_user_input() -> None:
                 logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
             finally:
                 logger.info(f"Loaded {len(book_data) - o_l} book data from file.")
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        logger.debug(f"File not found: {e.filename}. Creating new file.")
         with open("book-name.json", "xt", encoding="utf-8") as f:
             json.dump([], f, ensure_ascii=False)
 

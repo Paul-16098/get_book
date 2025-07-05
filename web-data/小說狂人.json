@@ -1,5 +1,4 @@
 {
-  "$schema": "./../book-data.schema.json",
   "name": "小說狂人",
   "web": "https://czbooks.net/s/{q}?q={q}"
 }
