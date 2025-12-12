@@ -1,24 +1,16 @@
 import glob
 import json
 import os
+from sys import argv
 from typing import TypedDict  # , NotRequired
 from webbrowser import open as open_url
-
-from paul_tools import logger_init
+from loguru import logger
 
 
 def safe_remove(filepath: str) -> None:
     """Safely remove a file if it exists."""
     if os.path.exists(filepath):
         os.remove(filepath)
-
-
-def initialize_logger() -> None:
-    """Initialize the logger and clean up old logs."""
-    global logger
-    logger = logger_init()
-    safe_remove("get_book.log")  # 移除舊的日誌檔案
-    logger.add("get_book.log", level="DEBUG")  # 添加新的日誌檔案
 
 
 # class WebDataCofgType(TypedDict):
@@ -91,7 +83,7 @@ class WebData:
             elif isinstance(arg, list):
                 values.extend(arg)
             elif isinstance(arg, dict):
-                kwargs.update({k: v for k, v in arg.items()})
+                kwargs.update(dict(arg.items()))
 
         try:
             return {"name": self._name, "web": self._web.format(*values, **kwargs)}
@@ -244,9 +236,12 @@ def handle_user_input() -> None:
         with open("book-name.json", "xt", encoding="utf-8") as f:
             json.dump([], f, ensure_ascii=False)
 
+    if argv:
+        logger.debug(f"Adding command line arguments to book data: {argv[1:]}")
+        book_data.extend(argv[1:])
     while True:
         print("Book name:", end="")
-        user_input = input()
+        user_input = input().strip()
         if not user_input:
             break
         if BookDataList.is_data_text(user_input):
@@ -259,7 +254,6 @@ def handle_user_input() -> None:
 def main() -> None:
     """主函數，負責執行整個流程。"""
     try:
-        initialize_logger()
         web_data_list.load_web_data()
         handle_user_input()
         book_data.process_books()
