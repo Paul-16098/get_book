@@ -236,19 +236,20 @@ def handle_user_input() -> None:
         with open("book-name.json", "xt", encoding="utf-8") as f:
             json.dump([], f, ensure_ascii=False)
 
-    if argv:
+    if len(argv[1:]) > 0:
         logger.debug(f"Adding command line arguments to book data: {argv[1:]}")
         book_data.extend(argv[1:])
-    while True:
-        print("Book name:", end="")
-        user_input = input().strip()
-        if not user_input:
-            break
-        if BookDataList.is_data_text(user_input):
-            book_data.append(BookDataList.text_to_data(user_input))
-        else:
-            book_data.append(user_input)
-        book_data.write_to_file()
+    else:
+        while True:
+            print("Book name:", end="")
+            user_input = input().strip()
+            if not user_input:
+                break
+            if BookDataList.is_data_text(user_input):
+                book_data.append(BookDataList.text_to_data(user_input))
+            else:
+                book_data.append(user_input)
+            book_data.write_to_file()
 
 
 def main() -> None:
