@@ -2,9 +2,12 @@ import glob
 import json
 import os
 from sys import argv
-from typing import TypedDict  # , NotRequired
+from typing import TypedDict
 from webbrowser import open as open_url
 from loguru import logger
+
+
+BOOK_NAME_FILE = "book-name.json"
 
 
 def safe_remove(filepath: str) -> None:
@@ -13,16 +16,11 @@ def safe_remove(filepath: str) -> None:
         os.remove(filepath)
 
 
-# class WebDataCofgType(TypedDict):
-#     pass
-
-
 class WebDataType(TypedDict):
     """定義 WebData 的型別結構。"""
 
     name: str
     web: str
-    # cofg: NotRequired[WebDataCofgType]
 
 
 class WebData:
@@ -32,11 +30,9 @@ class WebData:
         self,
         name: str,
         web: str,
-        # cofg: WebDataCofgType | None = None
     ) -> None:
         self._name = name
         self._web = web
-        # self._cofg = cofg or {}
 
     @staticmethod
     def from_file_load(path: str) -> "WebData":
@@ -62,11 +58,6 @@ class WebData:
     def web(self) -> str:
         """返回網站 URL。"""
         return self._web
-
-    # @property
-    # def cofg(self):
-    #     """返回網站的配置字典。"""
-    #     return self._cofg
 
     def get(self, *args: str | list[str] | dict[str, str] | None) -> dict[str, str]:
         """Format the web URL with given arguments.
@@ -147,23 +138,23 @@ class WebDataList(list[WebData]):
 
     def load_web_data(self) -> None:
         """從 JSON 檔案中載入網站數據。"""
-        web_datas = glob.glob("./web-data/*.json")
-        for web_data in web_datas:
+        web_dates = glob.glob("./web-data/*.json")
+        for web_data in web_dates:
             self.append(WebData.from_file_load(web_data))
             logger.debug(f"load web data: {web_data}")
-        logger.info(f"Loaded {len(web_datas)} web data files.")
+        logger.info(f"Loaded {len(web_dates)} web data files.")
 
 
 class BookDataList(list[str]):
     """表示書籍數據的列表類別。"""
 
-    def append(self, object: str) -> None:
+    def append(self, value: str) -> None:
         """添加書籍數據到列表中。"""
-        if self.is_data_text(object):
-            logger.debug(f"Appending book data: `{object}`")
-            return super().append(self.text_to_data(object))
-        logger.debug(f"Appending regular book data: `{object}`")
-        return super().append(object)
+        if self.is_data_text(value):
+            logger.debug(f"Appending book data: `{value}`")
+            return super().append(self.text_to_data(value))
+        logger.debug(f"Appending regular book data: `{value}`")
+        return super().append(value)
 
     @staticmethod
     def text_to_data(text: str) -> str:
@@ -179,7 +170,7 @@ class BookDataList(list[str]):
         """檢查文字中是否包含與資料相關的關鍵字。"""
         return any(keyword in data_text for keyword in ["有更新", "尚未閱讀", "無更新"])
 
-    def write_to_file(self, path: str = "book-name.json") -> None:
+    def write_to_file(self, path: str = BOOK_NAME_FILE) -> None:
         """Write the book data to a file."""
         safe_remove(path)
         with open(path, "w", encoding="utf-8") as f:
@@ -214,26 +205,30 @@ def handle_user_input() -> None:
     try:
         try:
             with open("book-name.d.json", "rt", encoding="utf-8") as f:
-                o_l = len(book_data)
+                original_length = len(book_data)
                 try:
                     book_data.extend(json.load(f))
                 except json.decoder.JSONDecodeError as e:
                     logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
                 finally:
-                    logger.info(f"Loaded {len(book_data) - o_l} book data from file.")
+                    logger.info(
+                        f"Loaded {len(book_data) - original_length} book data from file."
+                    )
         except FileNotFoundError:
             pass
-        with open("book-name.json", "rt", encoding="utf-8") as f:
-            o_l = len(book_data)
+        with open(BOOK_NAME_FILE, "rt", encoding="utf-8") as f:
+            original_length = len(book_data)
             try:
                 book_data.extend(json.load(f))
             except json.decoder.JSONDecodeError as e:
                 logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
             finally:
-                logger.info(f"Loaded {len(book_data) - o_l} book data from file.")
+                logger.info(
+                    f"Loaded {len(book_data) - original_length} book data from file."
+                )
     except FileNotFoundError as e:
         logger.debug(f"File not found: {e.filename}. Creating new file.")
-        with open("book-name.json", "xt", encoding="utf-8") as f:
+        with open(BOOK_NAME_FILE, "xt", encoding="utf-8") as f:
             json.dump([], f, ensure_ascii=False)
 
     if len(argv[1:]) > 0:
@@ -263,4 +258,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()  # 執行主函數
+    main()
