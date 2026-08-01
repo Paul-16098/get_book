@@ -4,194 +4,196 @@ import os
 from sys import argv
 from typing import TypedDict
 from webbrowser import open as open_url
-from loguru import logger
 
+from loguru import logger
 
 BOOK_NAME_FILE = "book-name.json"
 
 
 def safe_remove(filepath: str) -> None:
-    """Safely remove a file if it exists."""
-    if os.path.exists(filepath):
-        os.remove(filepath)
+	"""Safely remove a file if it exists."""
+	if os.path.exists(filepath):
+		os.remove(filepath)
 
 
 class WebDataType(TypedDict):
-    """定義 WebData 的型別結構。"""
+	"""定義 WebData 的型別結構。"""
 
-    name: str
-    web: str
+	name: str
+	web: str
 
 
 class WebData:
-    """表示單個網站數據的類別。"""
+	"""表示單個網站數據的類別。"""
 
-    def __init__(
-        self,
-        name: str,
-        web: str,
-    ) -> None:
-        self._name = name
-        self._web = web
+	def __init__(
+		self,
+		name: str,
+		web: str,
+	) -> None:
+		self._name = name
+		self._web = web
 
-    @staticmethod
-    def from_file_load(path: str) -> "WebData":
-        """Load book names and URLs from a JSON file.
+	@staticmethod
+	def from_file_load(path: str) -> "WebData":
+		"""Load book names and URLs from a JSON file.
 
-        :param path: Path to the JSON file
-        :return: A WebData instance
-        """
-        with open(path, "r", encoding="utf-8") as f:
-            j: WebDataType = json.load(f)
-        return WebData(
-            j.get("name", ""),
-            j.get("web", ""),
-            # j.get("cofg", {})
-        )
+		:param path: Path to the JSON file
+		:return: A WebData instance
+		"""
+		with open(path, "r", encoding="utf-8") as f:
+			j: WebDataType = json.load(f)
+		return WebData(
+			j.get("name", ""),
+			j.get("web", ""),
+			# j.get("cofg", {})
+		)
 
-    @property
-    def name(self) -> str:
-        """返回網站名稱。"""
-        return self._name
+	@property
+	def name(self) -> str:
+		"""返回網站名稱。"""
+		return self._name
 
-    @property
-    def web(self) -> str:
-        """返回網站 URL。"""
-        return self._web
+	@property
+	def web(self) -> str:
+		"""返回網站 URL。"""
+		return self._web
 
-    def get(self, *args: str | list[str] | dict[str, str] | None) -> dict[str, str]:
-        """Format the web URL with given arguments.
+	def get(self, *args: str | list[str] | dict[str, str] | None) -> dict[str, str]:
+		"""Format the web URL with given arguments.
 
-        :param args: Variable length argument list of strings, lists, or dictionaries for URL formatting
-        :return: A dictionary with formatted URL
-        """
-        values, kwargs = [], {}
-        for arg in args:
-            if arg is None:
-                continue
-            elif isinstance(arg, str):
-                values.append(arg)
-            elif isinstance(arg, list):
-                values.extend(arg)
-            elif isinstance(arg, dict):
-                kwargs.update(dict(arg.items()))
+		:param args: Variable length argument list of strings, lists, or dictionaries for URL formatting
+		:return: A dictionary with formatted URL
+		"""
+		values, kwargs = [], {}
+		for arg in args:
+			if arg is None:
+				continue
+			elif isinstance(arg, str):
+				values.append(arg)
+			elif isinstance(arg, list):
+				values.extend(arg)
+			elif isinstance(arg, dict):
+				kwargs.update(dict(arg.items()))
 
-        try:
-            return {"name": self._name, "web": self._web.format(*values, **kwargs)}
-        except KeyError:
-            return {"name": self._name, "web": self._web}
+		try:
+			return {"name": self._name, "web": self._web.format(*values, **kwargs)}
+		except KeyError:
+			return {"name": self._name, "web": self._web}
 
-    def open(self, *args: str | list[str] | dict[str, str] | None) -> bool:
-        """Open the formatted URL in the default browser.
+	def open(self, *args: str | list[str] | dict[str, str] | None) -> bool:
+		"""Open the formatted URL in the default browser.
 
-        :param args: Arguments to format the URL
-        :return: Result of opening the URL
-        """
-        return open_url(self.get(*args)["web"])
+		:param args: Arguments to format the URL
+		:return: Result of opening the URL
+		"""
+		return open_url(self.get(*args)["web"])
 
-    def __eq__(self, value: object) -> bool:
-        if not isinstance(value, WebData):
-            return False
-        return self._name == value._name and self._web == value._web
+	def __eq__(self, value: object) -> bool:
+		if not isinstance(value, WebData):
+			return False
+		return self._name == value._name and self._web == value._web
 
 
 class WebDataList(list[WebData]):
-    """表示多個 WebData 的列表類別。"""
+	"""表示多個 WebData 的列表類別。"""
 
-    def get(
-        self, index: int, *args: str | list[str] | dict[str, str] | None
-    ) -> dict[str, str]:
-        """Get formatted URL for a specific WebData in the list.
+	def get(
+		self, index: int, *args: str | list[str] | dict[str, str] | None
+	) -> dict[str, str]:
+		"""Get formatted URL for a specific WebData in the list.
 
-        :param index: Index of the WebData instance
-        :param args: Formatting arguments
-        :return: Formatted URL dictionary
-        """
-        return self[index].get(*args)
+		:param index: Index of the WebData instance
+		:param args: Formatting arguments
+		:return: Formatted URL dictionary
+		"""
+		return self[index].get(*args)
 
-    def get_all(
-        self, *args: str | list[str] | dict[str, str] | None
-    ) -> list[dict[str, str]]:
-        """Get formatted URLs for all WebData in the list.
+	def get_all(
+		self, *args: str | list[str] | dict[str, str] | None
+	) -> list[dict[str, str]]:
+		"""Get formatted URLs for all WebData in the list.
 
-        :param args: Formatting arguments
-        :return: list of formatted URL dictionaries
-        """
-        return [data.get(*args) for data in self]
+		:param args: Formatting arguments
+		:return: list of formatted URL dictionaries
+		"""
+		return [data.get(*args) for data in self]
 
-    def open(self, index: int, *args: str | list[str] | dict[str, str] | None) -> bool:
-        """Open URL for a specific WebData in the list.
+	def open(self, index: int, *args: str | list[str] | dict[str, str] | None) -> bool:
+		"""Open URL for a specific WebData in the list.
 
-        :param index: Index of the WebData instance
-        :param args: Formatting arguments
-        :return: Result of opening the URL
-        """
-        return self[index].open(*args)
+		:param index: Index of the WebData instance
+		:param args: Formatting arguments
+		:return: Result of opening the URL
+		"""
+		return self[index].open(*args)
 
-    def open_all(self, *args: str | list[str] | dict[str, str] | None) -> list[bool]:
-        """Open URLs for all WebData in the list.
+	def open_all(self, *args: str | list[str] | dict[str, str] | None) -> list[bool]:
+		"""Open URLs for all WebData in the list.
 
-        :param args: Formatting arguments
-        :return: list of results from opening each URL
-        """
-        return [data.open(*args) for data in self]
+		:param args: Formatting arguments
+		:return: list of results from opening each URL
+		"""
+		return [data.open(*args) for data in self]
 
-    def load_web_data(self) -> None:
-        """從 JSON 檔案中載入網站數據。"""
-        web_dates = glob.glob("./web-data/*.json")
-        for web_data in web_dates:
-            self.append(WebData.from_file_load(web_data))
-            logger.debug(f"load web data: {web_data}")
-        logger.info(f"Loaded {len(web_dates)} web data files.")
+	def load_web_data(self) -> None:
+		"""從 JSON 檔案中載入網站數據。"""
+		web_dates = glob.glob("./web-data/*.json")
+		for web_data in web_dates:
+			self.append(WebData.from_file_load(web_data))
+			logger.debug(f"load web data: {web_data}")
+		logger.info(f"Loaded {len(web_dates)} web data files.")
 
 
 class BookDataList(list[str]):
-    """表示書籍數據的列表類別。"""
+	"""表示書籍數據的列表類別。"""
 
-    def append(self, value: str) -> None:
-        """添加書籍數據到列表中。"""
-        if self.is_data_text(value):
-            logger.debug(f"Appending book data: `{value}`")
-            return super().append(self.text_to_data(value))
-        logger.debug(f"Appending regular book data: `{value}`")
-        return super().append(value)
+	def append(self, value: str) -> None:
+		"""添加書籍數據到列表中。"""
+		if self.is_data_text(value):
+			logger.debug(f"Appending book data: `{value}`")
+			return super().append(self.text_to_data(value))
+		logger.debug(f"Appending regular book data: `{value}`")
+		return super().append(value)
 
-    @staticmethod
-    def text_to_data(text: str) -> str:
-        """將文字轉換為書名清單。"""
-        return [
-            line.split(" ")[1].strip()
-            for line in text.strip().split("\n")
-            if line.strip()
-        ][0]
+	@staticmethod
+	def text_to_data(text: str) -> str:
+		"""將文字轉換為書名清單。"""
+		lines = text.strip().split("\n")
 
-    @staticmethod
-    def is_data_text(data_text: str) -> bool:
-        """檢查文字中是否包含與資料相關的關鍵字。"""
-        return any(keyword in data_text for keyword in ["有更新", "尚未閱讀", "無更新"])
+		for line in lines:
+			if line.strip():
+				return line.split(" ")[1].strip()
 
-    def write_to_file(self, path: str = BOOK_NAME_FILE) -> None:
-        """Write the book data to a file."""
-        safe_remove(path)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(self, f, ensure_ascii=False)
+		raise ValueError("No valid book name found in the provided text.")
 
-    def _process_single_book(self, book: str, index: int, total: int) -> None:
-        """Process a single book."""
-        progress = ((index + 1) / total) * 100
-        logger.debug(f"Processing: `{book}` ({index + 1}/{total})")
-        input(f"{progress:.2f}%({index + 1}/{total})=>{book}")
-        web_data_list.open_all({"q": book})
+	@staticmethod
+	def is_data_text(data_text: str) -> bool:
+		"""檢查文字中是否包含與資料相關的關鍵字。"""
+		return any(keyword in data_text for keyword in ["有更新", "尚未閱讀", "無更新"])
 
-    def process_books(self) -> None:
-        """Process all books in the book data list."""
-        total_books = len(self)
-        for i, book in enumerate(
-            self[:]
-        ):  # Use slicing to avoid modifying the list during iteration
-            self._process_single_book(book, i, total_books)
-            self.pop(0)
-            self.write_to_file()
+	def write_to_file(self, path: str = BOOK_NAME_FILE) -> None:
+		"""Write the book data to a file."""
+		safe_remove(path)
+		with open(path, "w", encoding="utf-8") as f:
+			json.dump(self, f, ensure_ascii=False)
+
+	def _process_single_book(self, book: str, index: int, total: int) -> None:
+		"""Process a single book."""
+		progress = ((index + 1) / total) * 100
+		logger.debug(f"Processing: `{book}` ({index + 1}/{total})")
+		input(f"{progress:.2f}%({index + 1}/{total})=>{book}")
+		web_data_list.open_all({"q": book})
+
+	def process_books(self) -> None:
+		"""Process all books in the book data list."""
+		total_books = len(self)
+		for i, book in enumerate(
+			self[:]
+		):  # Use slicing to avoid modifying the list during iteration
+			self._process_single_book(book, i, total_books)
+			self.pop(0)
+			self.write_to_file()
 
 
 # Predefined WebData instances
@@ -201,61 +203,61 @@ book_data: BookDataList = BookDataList()  # 預定義的書籍數據列表
 
 
 def handle_user_input() -> None:
-    """處理使用者輸入的書籍名稱。"""
-    try:
-        try:
-            with open("book-name.d.json", "rt", encoding="utf-8") as f:
-                original_length = len(book_data)
-                try:
-                    book_data.extend(json.load(f))
-                except json.decoder.JSONDecodeError as e:
-                    logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
-                finally:
-                    logger.info(
-                        f"Loaded {len(book_data) - original_length} book data from file."
-                    )
-        except FileNotFoundError:
-            pass
-        with open(BOOK_NAME_FILE, "rt", encoding="utf-8") as f:
-            original_length = len(book_data)
-            try:
-                book_data.extend(json.load(f))
-            except json.decoder.JSONDecodeError as e:
-                logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
-            finally:
-                logger.info(
-                    f"Loaded {len(book_data) - original_length} book data from file."
-                )
-    except FileNotFoundError as e:
-        logger.debug(f"File not found: {e.filename}. Creating new file.")
-        with open(BOOK_NAME_FILE, "xt", encoding="utf-8") as f:
-            json.dump([], f, ensure_ascii=False)
+	"""處理使用者輸入的書籍名稱。"""
+	try:
+		try:
+			with open("book-name.d.json", "rt", encoding="utf-8") as f:
+				original_length = len(book_data)
+				try:
+					book_data.extend(json.load(f))
+				except json.decoder.JSONDecodeError as e:
+					logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
+				finally:
+					logger.info(
+						f"Loaded {len(book_data) - original_length} book data from file."
+					)
+		except FileNotFoundError:
+			pass
+		with open(BOOK_NAME_FILE, "rt", encoding="utf-8") as f:
+			original_length = len(book_data)
+			try:
+				book_data.extend(json.load(f))
+			except json.decoder.JSONDecodeError as e:
+				logger.error(f"Error decoding JSON file:{e.doc}({e.msg})")
+			finally:
+				logger.info(
+					f"Loaded {len(book_data) - original_length} book data from file."
+				)
+	except FileNotFoundError as e:
+		logger.debug(f"File not found: {e.filename}. Creating new file.")
+		with open(BOOK_NAME_FILE, "xt", encoding="utf-8") as f:
+			json.dump([], f, ensure_ascii=False)
 
-    if len(argv[1:]) > 0:
-        logger.debug(f"Adding command line arguments to book data: {argv[1:]}")
-        book_data.extend(argv[1:])
-    else:
-        while True:
-            print("Book name:", end="")
-            user_input = input().strip()
-            if not user_input:
-                break
-            if BookDataList.is_data_text(user_input):
-                book_data.append(BookDataList.text_to_data(user_input))
-            else:
-                book_data.append(user_input)
-            book_data.write_to_file()
+	if len(argv[1:]) > 0:
+		logger.debug(f"Adding command line arguments to book data: {argv[1:]}")
+		book_data.extend(argv[1:])
+	else:
+		while True:
+			print("Book name:", end="")
+			user_input = input().strip()
+			if not user_input:
+				break
+			if BookDataList.is_data_text(user_input):
+				book_data.append(BookDataList.text_to_data(user_input))
+			else:
+				book_data.append(user_input)
+			book_data.write_to_file()
 
 
 def main() -> None:
-    """主函數，負責執行整個流程。"""
-    try:
-        web_data_list.load_web_data()
-        handle_user_input()
-        book_data.process_books()
-    except (EOFError, KeyboardInterrupt):
-        logger.info("\nOperation canceled.")
+	"""主函數，負責執行整個流程。"""
+	try:
+		web_data_list.load_web_data()
+		handle_user_input()
+		book_data.process_books()
+	except (EOFError, KeyboardInterrupt):
+		logger.info("\nOperation canceled.")
 
 
 if __name__ == "__main__":
-    main()
+	main()
